@@ -25,7 +25,7 @@ try:
     if all_poi.empty:
         raise ValueError("Объекты не найдены!")
 
-    # Сбрасываем MultiIndex, если есть (?)
+    # Сброс MultiIndex, если есть
     if isinstance(all_poi.index, pd.MultiIndex):
         all_poi.reset_index(inplace=True)
 
@@ -41,7 +41,7 @@ try:
     else:
         raise ValueError("Не найден столбец с OSM ID!")
 
-    # Проверканаличие необходимых столбцов
+    # Проверка наличия необходимых столбцов
     for col in ["name", "addr:street", "addr:housenumber", "building", "leisure", "healthcare", "office", "emergency", "shop"]:
         if col not in all_poi.columns:
             all_poi[col] = None
@@ -87,15 +87,15 @@ except Exception as e:
     print(f"Ошибка при загрузке файлов: {e}")
     exit()
 
-# Приводим названия колонок к нижнему регистру
+# Приведение названия колонок к нижнему регистру
 gdf1.columns = [col.lower() for col in gdf1.columns]
 gdf2.columns = [col.lower() for col in gdf2.columns]
 
-# Приводим ключевую колонку id к единому названию
+# Приведение ключевую колонку id к единому названию
 gdf1 = gdf1.rename(columns={"osm_id": "id"})
 gdf2 = gdf2.rename(columns={"osm_id": "id"})
 
-# Конвертируем id в строку чтобы избежат ьошибок при объединении таблиц
+# Конвертация id в строку чтобы избежат ьошибок при объединении таблиц
 gdf1["id"] = gdf1["id"].astype(str)
 gdf2["id"] = gdf2["id"].astype(str)
 
@@ -120,7 +120,7 @@ if "geometry_gpkg" in merged_gdf.columns and "geometry_geojson" in merged_gdf.co
     merged_gdf["geometry"] = merged_gdf["geometry_gpkg"].combine_first(merged_gdf["geometry_geojson"])
     merged_gdf.drop(columns=["geometry_gpkg", "geometry_geojson"], inplace=True)
 
-# Убеждаемся, что результирующий GeoDataFrame имеет корректную геометрию
+# Проверка GeoDataFrame на корректную геометрию
 merged_gdf = gpd.GeoDataFrame(merged_gdf, geometry="geometry", crs=gdf1.crs if gdf1.crs else gdf2.crs)
 
 # Преобразуем координаты в EPSG:3857 и добавляем их, если отсутствуют
